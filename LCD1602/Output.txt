@@ -1,0 +1,19 @@
+Read pins 2-7 as RS, E, and 4-7 of 1602 LCD device
+invalid command (0x00)
+8-bit; 1 line; 5x8
+8-bit; 1 line; 5x8
+8-bit; 1 line; 5x8
+4-bit; 1 line; 5x8
+display on; cursor off; blink off
+clear display
+increment cursor position; no display shift
+8-bit; 1 line; 5x8
+8-bit; 1 line; 5x8
+4-bit; 2 lines; 5x8
+display on; cursor off; blink off
+clear display
+increment cursor position; no display shift
+DDRAM: 0x0
+"Hello"
+DDRAM: 0x40
+"World!

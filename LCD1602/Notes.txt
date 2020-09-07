@@ -1,0 +1,68 @@
+While I like this approach, we run into serious limits with literal strings (see ReadPins.ino:15-18).
+
+Startup sequence of 0x0333
+--------------------------
+If in 8-bit mode (state 1):
+0000 ????   // invalid, clear display, cursor home, entry mode set, or display on/off control
+0011 ????   // function set: 8-bit, ? lines, ? font
+0011 ????   // function set: 8-bit, ? lines, ? font
+0011 ????   // function set: 8-bit, ? lines, ? font
+
+If in 4-bit mode (state 2: waiting for high-order 4 bits):
+0000        // Cursor home
+0011
+0011        // function set: 8-bit, 1 lines, 5x8 font
+0011
+
+If in 4-bit mode (state 3: waiting for low-order 4 bits):
+0000        // ?
+0011        // function set: 8-bit, 1 lines, 5x8 font
+0011
+0011 ????   // function set: 8-bit, ? lines, ? font
+
+Startup sequence of 0x333
+--------------------------
+If in 8-bit mode (state 1):
+0011 ????   // function set: 8-bit, ? lines, ? font
+0011 ????   // function set: 8-bit, ? lines, ? font
+0011 ????   // function set: 8-bit, ? lines, ? font
+
+If in 4-bit mode (state 2: waiting for high-order 4 bits):
+0011        // function set: 8-bit, 1 lines, 5x8 font
+0011
+0011 ????   // function set: 8-bit, ? lines, ? font
+
+If in 4-bit mode (state 3: waiting for low-order 4 bits):
+0011        // ?
+0011        // function set: 8-bit, 1 lines, 5x8 font
+0011 ????   // function set: 8-bit, ? lines, ? font
+
+000000: C 0000     // initial set of pin 3 to 0
+000900: C 0011     // initialize to 8-bit mode, wait 4500us + 100us
+004680: C 0011     // initialize to 8-bit mode, wait 150us + 100us
+000300: C 0011     // initialize to 8-bit mode, wait 100ux
+000160: C 0010     // LCD_FUNCTIONSET (0x20) | LCD_4BITMODE (0x00) | LCD_1LINE (0x00) | LCD_5x8DOTS (0x00)
+000152: C 0000
+000160: C 0000     // LCD_DISPLAYCONTROL (0x08) | LCD_DISPLAYON (0x04) | LCD_CURSOROFF (0x00) | LCD_BLINKOFF (0x00)
+000152: C 1100    
+000160: C 0000     // LCD_CLEARDISPLAY (0x01), wait 2000us + 100us
+000152: C 0001    
+002176: C 0000     // LCD_ENTRYMODESET (0x04) | LCD_ENTRYLEFT (0x02) | LCD_ENTRYSHIFTDECREMENT (0x00)
+000152: C 0110
+
+202620: C 0011     // second call to begin(), initialize to 8-bit mode
+004708: C 0011
+000304: C 0011
+000160: C 0010     // LCD_FUNCTIONSET (0x20) | LCD_4BITMODE (0x00) | LCD_2LINE (0x08) | LCD_5x8DOTS (0x00)
+000152: C 1000
+000160: C 0000     // LCD_DISPLAYCONTROL (0x08) | LCD_DISPLAYON (0x04) | LCD_CURSOROFF (0x00) | LCD_BLINKOFF (0x00)
+000156: C 1100
+000164: C 0000     // LCD_CLEARDISPLAY (0x01), wait 2000us + 100us
+000152: C 0001
+002184: C 0000     // LCD_ENTRYMODESET (0x04) | LCD_ENTRYLEFT (0x02) | LCD_ENTRYSHIFTDECREMENT (0x00)
+000152: C 0110
+
+000164: C 1000     // LCD_SETDDRAMADDR (0x08) | (col + _row_offsets[row])
+000152: C 0000
+000164: D 0100     // 'A'
+000156: D 0001

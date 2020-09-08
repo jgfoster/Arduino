@@ -1,3 +1,5 @@
+See a demo of this at https://www.youtube.com/watch?v=Qz0LTq4YxLI.
+
 While I like this approach, we run into serious limits with literal strings (see ReadPins.ino:15-18).
 
 Startup sequence of 0x0333
